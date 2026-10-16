@@ -67,14 +67,26 @@ public abstract class CamelMixin extends AbstractHorse {
         }
 
         // 2. Open the chest GUI when sneaking (Shift + Right-Click)
-        if (this.camelchest$hasChest && player.isSecondaryUseActive()) {
-            if (!this.level().isClientSide()) {
-                player.openMenu(new SimpleMenuProvider(
-                        (containerId, playerInventory, p) -> ChestMenu.threeRows(containerId, playerInventory,
-                                this.camelchest$inventory),
-                        Component.translatable("container.chest")));
-            }
-            cir.setReturnValue(InteractionResult.SUCCESS);
+        // if (this.camelchest$hasChest && player.isSecondaryUseActive()) {
+        // if (!this.level().isClientSide()) {
+        // player.openMenu(new SimpleMenuProvider(
+        // (containerId, playerInventory, p) -> ChestMenu.threeRows(containerId,
+        // playerInventory,
+        // this.camelchest$inventory),
+        // Component.translatable("container.chest")));
+        // }
+        // cir.setReturnValue(InteractionResult.SUCCESS);
+        // }
+    }
+
+    @Inject(method = "openCustomInventoryScreen", at = @At("HEAD"), cancellable = true)
+    private void camelchest$onOpenInventory(Player player, CallbackInfo ci) {
+        if (!this.level().isClientSide() && this.isTamed() && this.camelchest$hasChest && this.hasPassenger(player)) {
+            player.openMenu(new SimpleMenuProvider(
+                    (containerId, playerInventory, p) -> ChestMenu.threeRows(
+                            containerId, playerInventory, this.camelchest$inventory),
+                    Component.translatable("container.chest")));
+            ci.cancel();
         }
     }
 
